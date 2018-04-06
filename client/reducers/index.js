@@ -1,7 +1,7 @@
-import load from './load';
 import article from './article';
+import suggestion from './suggestion';
 
 export default {
-  load,
+  suggestion,
   article
 }

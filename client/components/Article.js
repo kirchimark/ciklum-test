@@ -6,10 +6,12 @@ import './styles/article.less'
 class Article extends React.Component {
   componentDidMount() {
     const params = new URLSearchParams(this.props.location.search);
-    const url = params.get('articleURL'); // bar
+    const url = params.get('articleURL'); 
 
     this.setState({url});
-    this.props.getArticle(url);
+
+    if (url)
+      this.props.getArticle(url);
   }
 
   componentWillReceiveProps(nextProps) {  }
@@ -43,6 +45,8 @@ class Article extends React.Component {
   render() {
     return (<div className="container">
       <div className="content-wrapper">
+        {!this.props.article && <h2>Enter Valid Url</h2>}
+        
         {this.props.article && this.props.article.title && <h2>
           {this.props.article.title}
         </h2>}

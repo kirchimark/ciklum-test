@@ -10,7 +10,7 @@ const mapStateToProps = (state) => ({
 
 const dispatchStateToProps = (dispatch) => ({
   getArticle: (url) => dispatch(getArticle(url)),
-  createSuggestion: (articleUrl,originalText,userText) => dispatch(createSuggestion(articleUrl,originalText,userText)),
+  createSuggestion: (articleUrl,originalText,userText,value) => dispatch(createSuggestion(articleUrl,originalText,userText,value)),
 });
 
 export default connect(mapStateToProps, dispatchStateToProps)(Article);

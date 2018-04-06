@@ -2,14 +2,14 @@ const router = require('express').Router();
 const mongoose = require('mongoose');
 const Suggestion = require('../models/Suggestion');
 
-const groupByField = (array, field) => {
+const groupByUrlAndField = (array, field) => {
   let result = [];
 
   array.forEach(item=> {
     if (result.length === 0) {
       return result.push([item]);
     }
-    const index = result.findIndex(arr=>arr.find(i=>i[field]===item[field]));
+    const index = result.findIndex(arr=>arr.find(i=>i[field]===item[field] && i['articleUrl'] === item['articleUrl'] ));
 
     if (index === -1)
       result.push([item])
@@ -32,7 +32,7 @@ router.get('/fetchAll/:approved', (req, res) => {
       const filter = approved === 'approved' ? filterForApproved : filterForNotApproved
       const arg = approved === 'approved' ? true : false;
   
-      res.status(200).json(filterForApproved(groupByField(results, 'articleUrl'),  false ));
+      res.status(200).json(filter(groupByUrlAndField(results, 'originalText'),  arg ));
     })
     .catch(e => {
       res.status(400).json({
@@ -43,10 +43,11 @@ router.get('/fetchAll/:approved', (req, res) => {
 });
 
 
-router.patch('/update', (req, res) => {
-  const { userText, _id } = req.body;
-  if (userText && _id) {
-    Suggestion.update({ _id }, { $set: {isApproved: true} }).
+router.post('/update', (req, res) => {
+  const { _id, value } = req.body;
+
+  if (_id && value) {
+    Suggestion.update({ _id }, { $set: {isApproved: value} }).
     then(() => {
       res.status(200).json({
           status: 'Succeeded',
@@ -69,9 +70,9 @@ router.patch('/update', (req, res) => {
 });
 
 router.delete('/delete', (req, res) => {
-  const { articleUrl } = req.body;
+  const { articleUrl, originalText } = req.body;
   if (articleUrl) {
-    Suggestion.find({articleUrl})
+    Suggestion.find({articleUrl, originalText})
       .remove()
       .exec()
       .then(() => {
@@ -95,8 +96,7 @@ router.delete('/delete', (req, res) => {
 });
 
 router.post('/save', (req, res) => {
-  const {articleUrl, originalText, userText} = req.body;
-  console.log(articleUrl, originalText, userText);
+  const {articleUrl, originalText, userText, value} = req.body;
 
   if (articleUrl && originalText && userText) {
     new Suggestion({
@@ -104,7 +104,7 @@ router.post('/save', (req, res) => {
       articleUrl,
       originalText,
       userText,
-      isApproved: false
+      isApproved: value === 'approved'  ? true: false
     }).save()
     .then(() => {
       res.json({
